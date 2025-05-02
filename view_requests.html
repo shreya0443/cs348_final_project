@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Exorcism Requests</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer Name</th>
+                <th>Spirit</th>
+                <th>Exorcist</th>
+                <th>Preferred Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in requests %}
+            <tr>
+                <td>{{ request.id }}</td>
+                <td>{{ request.customer_name }}</td>
+                <td>{{ request.spirit_id }}</td>
+                <td>{{ request.exorcist.name if request.exorcist else "Any Available" }}</td>
+                <td>{{ request.request_date }}</td>
+                <td>
+                    <!-- Edit button -->
+                    <a href="{{ url_for('edit_request', request_id=request.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    
+                    <!-- Delete button (form to send POST request) -->
+                    <form method="POST" action="{{ url_for('delete_request', request_id=request.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Active Spirits Report{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Active Spirits Report</h2>
+    
+    <!-- Filters Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5>Spirit Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Location</label>
+                    <select name="location_id" class="form-select">
+                        <option value="all">All Locations</option>
+                        {% for location in locations %}
+                        <option value="{{ location.id }}" 
+                            {% if selected_location == location.id|string %}selected{% endif %}>
+                            {{ location.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Threat Level</label>
+                    <select name="threat_level" class="form-select">
+                        <option value="all">All Levels</option>
+                        <option value="High" {% if selected_threat == 'High' %}selected{% endif %}>High</option>
+                        <option value="Medium" {% if selected_threat == 'Medium' %}selected{% endif %}>Medium</option>
+                        <option value="Low" {% if selected_threat == 'Low' %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Spirit Type</label>
+                    <select name="type" class="form-select">
+                        <option value="all">All Types</option>
+                        {% for type in stats.by_type.keys() %}
+                        <option value="{{ type }}" {% if selected_type == type %}selected{% endif %}>
+                            {{ type }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{{ url_for('active_spirits') }}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="row mb-4">
+        <!-- Threat Level Stats -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h6>Threat Level Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="threatChart" height="200"></canvas>
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            High Threat
+                            <span class="badge bg-danger rounded-pill">{{ stats.by_threat.High }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Medium Threat
+                            <span class="badge bg-warning rounded-pill">{{ stats.by_threat.Medium }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Low Threat
+                            <span class="badge bg-success rounded-pill">{{ stats.by_threat.Low }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type Distribution -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6>Spirit Type Breakdown</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="typeChart" height="200"></canvas>
+                    <div class="mt-3">
+                        {% for type, data in stats.by_type.items() %}
+                        <div class="mb-2">
+                            <strong>{{ type }}</strong>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ data.percent }}%">
+                                    {{ data.count }} ({{ data.percent }}%)
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6>Key Metrics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Total Active Spirits: {{ stats.total }}</h5>
+                    </div>
+                    <div class="alert alert-secondary">
+                        Avg. Days Active: <strong>{{ stats.avg_days_active }}</strong>
+                    </div>
+                    {% if stats.most_dangerous_location %}
+                    <div class="alert alert-warning">
+                        Most Dangerous Location: 
+                        <strong>{{ stats.most_dangerous_location.name }}</strong>
+                        <br>
+                        ({{ stats.most_dangerous_location.high_threat }} high threat spirits)
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority List -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5>Top 5 Exorcism Priorities</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for spirit in stats.exorcism_priority %}
+                <div class="col-md-2 mb-3">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header bg-danger text-white text-center">
+                            #{{ loop.index }}
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ spirit.name }}</h6>
+                            <p class="card-text small">
+                                <span class="badge bg-{{ 'danger' if spirit.threat_level == 'High' else 'warning' if spirit.threat_level == 'Medium' else 'success' }}">
+                                    {{ spirit.threat_level }}
+                                </span>
+                                <br>
+                                {{ spirit.type }}<br>
+                                {{ spirit.location.name }}<br>
+                                Active for {{ (datetime.utcnow() - spirit.reported_at).days }} days
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Spirit List -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5>All Active Spirits ({{ spirits|length }})</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Spirit</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Threat</th>
+                        <th>Reported</th>
+                        <th>Days Active</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for spirit in spirits %}
+                    <tr class="{{ 'table-danger' if spirit.threat_level == 'High' else 'table-warning' if spirit.threat_level == 'Medium' else '' }}">
+                        <td>
+                            <strong>{{ spirit.name }}</strong>
+                            {% if spirit in stats.exorcism_priority %}
+                            <span class="badge bg-danger ms-2">Priority {{ stats.exorcism_priority.index(spirit) + 1 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ spirit.type }}</td>
+                        <td>{{ spirit.location.name }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'danger' if spirit.threat_level == 'High' else 'warning' if spirit.threat_level == 'Medium' else 'success' }}">
+                                {{ spirit.threat_level }}
+                            </span>
+                        </td>
+                        <td>{{ spirit.reported_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ (datetime.utcnow() - spirit.reported_at).days }}</td>
+                        <td>
+                            {% if loop.index <= 5 %}
+                            <span class="badge bg-danger">#{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No active spirits found matching your filters
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Threat Level Chart
+    const threatCtx = document.getElementById('threatChart').getContext('2d');
+    new Chart(threatCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['High', 'Medium', 'Low'],
+            datasets: [{
+                data: [{{ stats.by_threat.High }}, {{ stats.by_threat.Medium }}, {{ stats.by_threat.Low }}],
+                backgroundColor: ['#dc3545', '#ffc107', '#28a745']
+            }]
+        }
+    });
+
+    // Spirit Type Chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ stats.by_type.keys()|list|tojson }},
+            datasets: [{
+                data: {{ stats.by_type.values()|map(attribute='count')|list|tojson }},
+                backgroundColor: ['#007bff', '#6610f2', '#6f42c1', '#e83e8c', '#fd7e14']
+            }]
+        }
+    });
+</script>
+
+<style>
+    .table-hover tbody tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+    .badge.bg-danger {
+        box-shadow: 0 0 0 2px rgba(220,53,69,0.3);
+    }
+    .badge.bg-warning {
+        box-shadow: 0 0 0 2px rgba(255,193,7,0.3);
+    }
+    .card {
+        transition: transform 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

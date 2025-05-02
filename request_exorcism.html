@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Request an Exorcism</h2>
+    <form method="POST" action="{{ url_for('request_exorcism') }}">
+        <div class="mb-3">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-control" name="customer_name" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Select a Spirit</label>
+            <select class="form-select" name="spirit_id" required>
+                <option value="">-- Select a Spirit --</option>
+                {% for spirit in spirits %}
+                <option value="{{ spirit.id }}">{{ spirit.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preferred Exorcist (Optional)</label>
+            <select class="form-select" name="exorcist_id">
+                <option value="">Any Available</option>
+                {% for exorcist in exorcists %}
+                <option value="{{ exorcist.id }}">{{ exorcist.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preferred Date & Time</label>
+            <input type="datetime-local" class="form-control" name="preferred_datetime">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Additional Notes</label>
+            <textarea class="form-control" name="notes" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+</div>
+{% endblock %}

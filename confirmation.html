@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Exorcism Request Submitted!</h2>
+    <p>Thank you, {{ request.customer_name }}! Your request for an exorcism has been submitted successfully.</p>
+    <p><strong>Spirit:</strong> {{ request.spirit.name }} ({{ request.spirit.threat_level }})</p>
+    {% if request.exorcist %}
+        <p><strong>Assigned Exorcist:</strong> {{ request.exorcist.name }} ({{ request.exorcist.expertise }})</p>
+    {% else %}
+        <p><strong>Assigned Exorcist:</strong> Any Available</p>
+    {% endif %}
+    <p><strong>Preferred Date & Time:</strong> {{ request.preferred_datetime }}</p>
+    <p><strong>Additional Notes:</strong> {{ request.notes }}</p>
+    <p>We will contact you at <strong>{{ request.email }}</strong> shortly.</p>
+    <a href="{{ url_for('request_exorcism') }}" class="btn btn-primary">Submit Another Request</a>
+</div>
+{% endblock %}

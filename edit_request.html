@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Edit Exorcism Request</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-control" name="customer_name" value="{{ request.customer_name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" value="{{ request.email }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Select a Spirit</label>
+            <select class="form-select" name="spirit_id" required>
+                {% for spirit in spirits %}
+                <option value="{{ spirit.id }}" {% if spirit.id == request.spirit_id %}selected{% endif %}>{{ spirit.name }} ({{ spirit.threat_level }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preferred Exorcist (Optional)</label>
+            <select class="form-select" name="exorcist_id">
+                <option value="">Any Available</option>
+                {% for exorcist in exorcists %}
+                <option value="{{ exorcist.id }}" {% if exorcist.id == request.exorcist_id %}selected{% endif %}>{{ exorcist.name }} (Success Rate: {{ exorcist.success_rate }}%)</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Preferred Date</label>
+            <input type="date" class="form-control" name="preferred_date" value="{{ request.preferred_date }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Additional Notes</label>
+            <textarea class="form-control" name="notes" rows="3">{{ request.notes }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Request</button>
+        <a href="{{ url_for('view_requests') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Spirit Activity Report</h2>
+<form method="POST">
+    <div>
+        <label>Location:</label>
+        <select name="location_id">
+            <option value="">All Locations</option>
+            {% for location in locations %}
+            <option value="{{ location.id }}" {% if selected_location == location.id|string %}selected{% endif %}>
+                {{ location.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div>
+        <label>Threat Level:</label>
+        <select name="threat_level">
+            <option value="">All Levels</option>
+            <option value="Low" {% if selected_threat == 'Low' %}selected{% endif %}>Low</option>
+            <option value="Medium" {% if selected_threat == 'Medium' %}selected{% endif %}>Medium</option>
+            <option value="High" {% if selected_threat == 'High' %}selected{% endif %}>High</option>
+        </select>
+    </div>
+    
+    <div>
+        <label>Status:</label>
+        <select name="status">
+            <option value="">All Statuses</option>
+            <option value="Active" {% if selected_status == 'Active' %}selected{% endif %}>Active</option>
+            <option value="Exorcised" {% if selected_status == 'Exorcised' %}selected{% endif %}>Exorcised</option>
+        </select>
+    </div>
+    
+    <button type="submit">Generate Report</button>
+</form>
+
+{% if spirits %}
+<h3>Report Results</h3>
+<p>Total Spirits: {{ total_spirits }}</p>
+<p>High Threat Spirits: {{ high_threat }} ({{ (high_threat/total_spirits*100)|round(1) }}%)</p>
+<p>Exorcised Spirits: {{ exorcised }} ({{ (exorcised/total_spirits*100)|round(1) }}%)</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Threat Level</th>
+            <th>Status</th>
+            <th>Reported At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for spirit in spirits %}
+        <tr>
+            <td>{{ spirit.name }}</td>
+            <td>{{ spirit.type }}</td>
+            <td>{{ spirit.location.name }}</td>
+            <td>{{ spirit.threat_level }}</td>
+            <td>{{ spirit.status }}</td>
+            <td>{{ spirit.reported_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
