@@ -18,7 +18,7 @@
             <tr>
                 <td>{{ request.id }}</td>
                 <td>{{ request.customer_name }}</td>
-                <td>{{ request.spirit_id }}</td>
+                <td>{{ request.spirit.name }}</td>
                 <td>{{ request.exorcist.name if request.exorcist else "Any Available" }}</td>
                 <td>{{ request.request_date }}</td>
                 <td>
